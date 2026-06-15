@@ -120,7 +120,7 @@ export default function ServiceCallsPage() {
         </button>
       </div>
 
-      <table className="tact-table">
+      <table className={`tact-table${expandAll ? ' expanded' : ''}`}>
         <thead>
           <tr>
             <th>מספר קריאה</th>
@@ -193,7 +193,7 @@ export default function ServiceCallsPage() {
               </td>
             </tr>
             {expandAll && (
-              <tr className={local ? 'row-local' : undefined} onClick={() => setSelected(c)}>
+              <tr className={`call-detail${local ? ' row-local' : ''}`} onClick={() => setSelected(c)}>
                 <td colSpan={12} style={{ paddingTop: 0, borderTop: 'none' }}>
                   <div style={{
                     display: 'flex', flexWrap: 'wrap', gap: '6px 22px',
