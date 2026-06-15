@@ -66,6 +66,38 @@ sudo systemctl restart service-call-api
 ```
 (או הרץ `deploy/redeploy.sh`).
 
+## 5א. פריסה אוטומטית (CI/CD) — פעם אחת
+מוגדר ב‑`.github/workflows/deploy.yml`: כל `git push` ל‑`main` מריץ
+`deploy/redeploy.sh` על השרת דרך SSH. הקמה חד‑פעמית:
+
+**1) מפתח SSH ייעודי לפריסה (על המכונה המקומית שלך):**
+```bash
+ssh-keygen -t ed25519 -f deploy_key -N "" -C "github-actions-deploy"
+```
+זה יוצר `deploy_key` (פרטי) ו‑`deploy_key.pub` (ציבורי).
+
+**2) הוסף את המפתח הציבורי לשרת (SSH פנימה כ‑ubuntu):**
+```bash
+cat deploy_key.pub >> ~/.ssh/authorized_keys
+```
+
+**3) ודא ש‑ubuntu יכול להריץ את ה‑restart בלי סיסמה** (ברירת המחדל ב‑Lightsail).
+בדיקה על השרת: `sudo -n systemctl restart service-call-api` צריך לעבוד בלי בקשת סיסמה.
+אם לא — הוסף:
+```bash
+echo 'ubuntu ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart service-call-api' | sudo tee /etc/sudoers.d/service-call-deploy
+```
+
+**4) הוסף Secrets ב‑GitHub** (Settings → Secrets and variables → Actions → New repository secret):
+| שם | ערך |
+|----|-----|
+| `DEPLOY_HOST` | ה‑Static IP של Lightsail (או `service-call.newavera.co.il`) |
+| `DEPLOY_USER` | `ubuntu` |
+| `DEPLOY_SSH_KEY` | **כל התוכן** של הקובץ הפרטי `deploy_key` |
+
+לאחר מכן מחק את `deploy_key` המקומי. מעכשיו כל push ל‑main פורס אוטומטית
+(אפשר גם להריץ ידנית: Actions → Deploy to production → Run workflow).
+
 ## גיבוי
 ה‑DB הוא קובץ יחיד: `/opt/service-call/database/servicecall.db`.
 מומלץ Lightsail automatic snapshots, או גיבוי תקופתי של הקובץ.
