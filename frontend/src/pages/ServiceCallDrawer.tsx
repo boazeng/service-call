@@ -11,6 +11,8 @@ import TactIcon from '../components/TactIcon'
 const STATUSES: Status[] = ['new', 'in_review', 'ready_to_send', 'sent', 'in_progress', 'closed', 'cancelled']
 const URGENCIES: Urgency[] = ['low', 'medium', 'high', 'urgent']
 const CATEGORIES: Category[] = ['maintenance', 'energy', 'other']
+// Default Priority branch per category (editable until the call is synced).
+const CATEGORY_BRANCH: Partial<Record<Category, string>> = { maintenance: '026', energy: '110' }
 
 export default function ServiceCallDrawer({
   call, onClose, onChanged,
@@ -29,7 +31,7 @@ export default function ServiceCallDrawer({
     status: call.status,
     customer_name: call.customer_name ?? '',
     site: call.site ?? '',
-    branch: call.branch ?? '',
+    branch: call.branch || (call.priority_doc_number ? '' : CATEGORY_BRANCH[call.category] ?? ''),
     device_sernum: call.device_sernum ?? '',
     contact_phone: call.contact_phone ?? '',
     assigned_to: call.assigned_to ?? '',
@@ -48,6 +50,20 @@ export default function ServiceCallDrawer({
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }))
+  }
+
+  // Changing the category re-applies the default branch — but only for an
+  // unsynced call whose branch is still empty or a known default (never an
+  // explicit value the operator typed).
+  function setCategory(newCat: Category) {
+    setForm((f) => {
+      const isDefaultBranch = !f.branch || Object.values(CATEGORY_BRANCH).includes(f.branch)
+      return {
+        ...f,
+        category: newCat,
+        branch: !inPriority && isDefaultBranch ? (CATEGORY_BRANCH[newCat] ?? '') : f.branch,
+      }
+    })
   }
 
   async function save() {
@@ -124,11 +140,11 @@ export default function ServiceCallDrawer({
             </select>
           </Field>
           <Field label="תאריך פתיחה">
-            <input dir="ltr" readOnly value={fmtDate(call.created_at)}
+            <input dir="ltr" readOnly value={fmtDate(call.open_date || call.created_at)}
               style={{ textAlign: 'right', color: 'var(--color-text-light)' }} />
           </Field>
           <Field label="שעת פתיחה">
-            <input dir="ltr" readOnly value={fmtTime(call.created_at)}
+            <input dir="ltr" readOnly value={fmtTime(call.open_date || call.created_at)}
               style={{ textAlign: 'right', color: 'var(--color-text-light)' }} />
           </Field>
           <Row>
@@ -176,7 +192,7 @@ export default function ServiceCallDrawer({
           </Field>
           <Row>
             <Field label="קטגוריה">
-              <select value={form.category} onChange={(e) => set('category', e.target.value as Category)}>
+              <select value={form.category} onChange={(e) => setCategory(e.target.value as Category)}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
               </select>
             </Field>
@@ -188,7 +204,9 @@ export default function ServiceCallDrawer({
           </Row>
           <Row>
             <Field label="מספר סניף">
-              <input dir="ltr" value={form.branch} onChange={(e) => set('branch', e.target.value)} />
+              <input dir="ltr" value={form.branch} readOnly={inPriority}
+                onChange={(e) => set('branch', e.target.value)}
+                style={inPriority ? { color: 'var(--color-text-light)' } : undefined} />
             </Field>
             <Field label="הוקצה ל">
               <input value={form.assigned_to} onChange={(e) => set('assigned_to', e.target.value)} />

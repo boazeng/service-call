@@ -56,6 +56,7 @@ class ServiceCall(Base):
     paid_until: Mapped[str | None] = mapped_column(String(40))         # EXPIRYDATE
     downtime_start: Mapped[str | None] = mapped_column(String(40))     # BREAKSTART
     downtime_end: Mapped[str | None] = mapped_column(String(40))       # BREAKEND
+    open_date: Mapped[str | None] = mapped_column(String(40))          # Priority STARTDATE — תאריך/שעת פתיחה
     assigned_to: Mapped[str | None] = mapped_column(String(160))
 
     # Sync bookkeeping.

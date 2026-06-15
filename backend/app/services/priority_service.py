@@ -38,6 +38,9 @@ _DEVICE_SELECT = (
 # Entity that holds devices/equipment in Priority.
 _DEVICE_ENTITY = "SERNUMBERS"
 
+# Default Priority branch (BRANCHNAME) per call category.
+_CATEGORY_BRANCH = {"maintenance": "026", "energy": "110"}
+
 
 class PriorityError(RuntimeError):
     pass
@@ -96,7 +99,9 @@ def _map_out(call: ServiceCall) -> dict[str, Any]:
     """
     body: dict[str, Any] = {
         "CUSTNAME": "99999",
-        "BRANCHNAME": call.site or "001",
+        # Branch (BRANCHNAME) defaults by category: maintenance→026, energy→110.
+        # An explicit call.branch (editable until synced) overrides the default.
+        "BRANCHNAME": call.branch or _CATEGORY_BRANCH.get(call.category) or "001",
         "STARTDATE": _israel_now(),
     }
     details = call.title or (call.description or "")[:40]
@@ -124,6 +129,7 @@ def _map_in(record: dict[str, Any]) -> dict[str, Any]:
         "branch_description": record.get("BRANCHDES"),
         "device_sernum": record.get("SERNUM"),
         "contact_phone": record.get("PHONENUM"),
+        "open_date": record.get("STARTDATE"),
         "priority_status": record.get("CALLSTATUSCODE"),
         "contract_number": record.get("CONTNUM"),
         "contract_status": record.get("CONTSTATDES"),

@@ -149,7 +149,7 @@ export default function ServiceCallsPage() {
                 )}
               </td>
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--color-text-light)' }}>
-                {fmtDate(c.created_at)}
+                {fmtDate(c.open_date || c.created_at)}
               </td>
               <td>{c.device_site_description || c.site || '—'}</td>
               <td style={{ fontWeight: 600 }}>{c.customer_name || '—'}</td>
