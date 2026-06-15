@@ -162,16 +162,16 @@ export default function ServiceCallsPage() {
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--color-text-light)' }}>
                 {fmtDate(c.open_date || c.created_at)}
               </td>
-              <td>{c.device_site_description || c.site || '—'}</td>
-              <td style={{ fontWeight: 600 }}>{c.customer_name || '—'}</td>
-              <td>{c.description || c.title || '—'}</td>
+              <td><Clip w={170}>{c.device_site_description || c.site || '—'}</Clip></td>
+              <td style={{ fontWeight: 600 }}><Clip w={150}>{c.customer_name || '—'}</Clip></td>
+              <td><Clip w={230}>{c.description || c.title || '—'}</Clip></td>
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
                 {c.contact_phone || '—'}
               </td>
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
                 {c.device_sernum || '—'}
               </td>
-              <td>{c.device_part_description || '—'}</td>
+              <td><Clip w={160}>{c.device_part_description || '—'}</Clip></td>
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
                 {c.contract_number || '—'}
               </td>
@@ -237,6 +237,15 @@ function fmtDate(v: string | null): string {
   if (!v) return '—'
   const [y, m, d] = v.slice(0, 10).split('-')
   return y && m && d ? `${d}/${m}/${y}` : '—'
+}
+
+function Clip({ children, w }: { children: React.ReactNode; w: number }) {
+  const title = typeof children === 'string' ? children : undefined
+  return (
+    <div title={title} style={{ maxWidth: w, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {children}
+    </div>
+  )
 }
 
 function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
