@@ -6,7 +6,7 @@ import {
   type ServiceCall, type ServiceCallList,
   type Source, type Status, type Urgency,
 } from '../lib/types'
-import { CategoryChip, SourceChip, StatusChip, SyncChip, UrgencyChip } from '../components/badges'
+import { StatusChip } from '../components/badges'
 import TactIcon from '../components/TactIcon'
 import ServiceCallDrawer from './ServiceCallDrawer'
 
@@ -103,16 +103,17 @@ export default function ServiceCallsPage() {
       <table className="tact-table">
         <thead>
           <tr>
-            <th>מספר</th>
-            <th>כותרת</th>
-            <th>חברה</th>
-            <th>לקוח / אתר</th>
-            <th>קטגוריה</th>
-            <th>דחיפות</th>
+            <th>מספר קריאה</th>
             <th>סטטוס</th>
-            <th>מקור</th>
-            <th>סנכרון</th>
-            <th>Priority</th>
+            <th>תאריך פתיחה</th>
+            <th>תאור אתר לקוח</th>
+            <th>שם לקוח</th>
+            <th>פרטים</th>
+            <th>טלפון</th>
+            <th>מספר מכשיר</th>
+            <th>תאור מתקן</th>
+            <th>מספר חוזה</th>
+            <th>שולם עד</th>
             <th></th>
           </tr>
         </thead>
@@ -129,18 +130,6 @@ export default function ServiceCallsPage() {
                 {local && <span className="local-dot" />}
                 {c.call_number}
               </td>
-              <td>{c.title}</td>
-              <td style={{ fontWeight: 600 }}>{c.company || '—'}</td>
-              <td>
-                <div>{c.customer_name || '—'}</div>
-                {c.device_sernum && (
-                  <div dir="ltr" style={{ fontSize: '0.74rem', color: 'var(--color-text-light)', fontFamily: 'var(--font-family-en)', textAlign: 'right' }}>
-                    מכשיר {c.device_sernum}{c.branch ? ` · סניף ${c.branch}` : ''}
-                  </div>
-                )}
-              </td>
-              <td><CategoryChip value={c.category} /></td>
-              <td><UrgencyChip value={c.urgency} /></td>
               <td>
                 {c.priority_status ? (
                   <span className="tact-chip" style={{ background: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}>
@@ -150,14 +139,24 @@ export default function ServiceCallsPage() {
                   <StatusChip value={c.status} />
                 )}
               </td>
-              <td><SourceChip value={c.source} /></td>
-              <td><SyncChip value={c.sync_status} /></td>
-              <td style={{ fontFamily: 'var(--font-family-en)', color: 'var(--color-text-light)' }}>
-                {c.priority_doc_number || (
-                  <span style={{ color: 'var(--color-accent)', fontWeight: 700, fontFamily: 'var(--font-family)' }}>
-                    לא ב-Priority
-                  </span>
-                )}
+              <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--color-text-light)' }}>
+                {fmtDate(c.created_at)}
+              </td>
+              <td>{c.site || '—'}</td>
+              <td style={{ fontWeight: 600 }}>{c.customer_name || '—'}</td>
+              <td>{c.description || c.title || '—'}</td>
+              <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
+                {c.contact_phone || '—'}
+              </td>
+              <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
+                {c.device_sernum || '—'}
+              </td>
+              <td>{c.device_part_description || '—'}</td>
+              <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
+                {c.contract_number || '—'}
+              </td>
+              <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--color-text-light)' }}>
+                {fmtDate(c.paid_until)}
               </td>
               <td style={{ whiteSpace: 'nowrap' }}>
                 {local && (
@@ -176,7 +175,7 @@ export default function ServiceCallsPage() {
             )
           })}
           {data && data.items.length === 0 && (
-            <tr><td colSpan={11} style={{ textAlign: 'center', color: 'var(--color-text-light)', padding: 28 }}>
+            <tr><td colSpan={12} style={{ textAlign: 'center', color: 'var(--color-text-light)', padding: 28 }}>
               לא נמצאו קריאות
             </td></tr>
           )}
@@ -192,6 +191,12 @@ export default function ServiceCallsPage() {
       )}
     </div>
   )
+}
+
+function fmtDate(v: string | null): string {
+  if (!v) return '—'
+  const [y, m, d] = v.slice(0, 10).split('-')
+  return y && m && d ? `${d}/${m}/${y}` : '—'
 }
 
 function Select({

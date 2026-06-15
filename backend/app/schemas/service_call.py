@@ -75,6 +75,8 @@ class ServiceCallOut(ServiceCallBase):
     paid_until: str | None = None
     downtime_start: str | None = None
     downtime_end: str | None = None
+    # תאור מתקן — description of the linked device (Device.part_description).
+    device_part_description: str | None = None
     external_id: str | None
     sync_error: str | None
     created_at: datetime

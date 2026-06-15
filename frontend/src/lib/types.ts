@@ -43,6 +43,7 @@ export type ServiceCall = {
   paid_until: string | null
   downtime_start: string | null
   downtime_end: string | null
+  device_part_description: string | null
   external_id: string | null
   sync_error: string | null
   created_at: string

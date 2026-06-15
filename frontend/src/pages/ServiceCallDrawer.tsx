@@ -118,11 +118,53 @@ export default function ServiceCallDrawer({
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Field label="סטטוס">
+            <select value={form.status} onChange={(e) => set('status', e.target.value as Status)}>
+              {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </select>
+          </Field>
+          <Field label="תאריך פתיחה">
+            <input dir="ltr" readOnly value={fmtDate(call.created_at)}
+              style={{ textAlign: 'right', color: 'var(--color-text-light)' }} />
+          </Field>
+          <Row>
+            <Field label="תאור אתר לקוח">
+              <input value={form.site} onChange={(e) => set('site', e.target.value)} />
+            </Field>
+            <Field label="שם לקוח">
+              <input value={form.customer_name} onChange={(e) => set('customer_name', e.target.value)} />
+            </Field>
+          </Row>
+          <Field label="פרטים">
+            <textarea rows={4} value={form.description} onChange={(e) => set('description', e.target.value)} />
+          </Field>
+          <Row>
+            <Field label="טלפון">
+              <input dir="ltr" value={form.contact_phone} onChange={(e) => set('contact_phone', e.target.value)} />
+            </Field>
+            <Field label="מספר מכשיר">
+              <input dir="ltr" value={form.device_sernum} onChange={(e) => set('device_sernum', e.target.value)} />
+            </Field>
+          </Row>
+          {device?.part_description && (
+            <Field label="תאור מתקן">
+              <input readOnly value={device.part_description}
+                style={{ color: 'var(--color-text-light)' }} />
+            </Field>
+          )}
+          {device && (
+            <div style={{
+              padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-primary-soft)', fontSize: '0.85rem',
+            }}>
+              <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>מכשיר מקושר</div>
+              <div dir="ltr" style={{ fontFamily: 'var(--font-family-en)' }}>{device.sernum} · {device.part_name}</div>
+              {device.status && <div style={{ color: 'var(--color-text-light)' }}>סטטוס: {device.status}</div>}
+            </div>
+          )}
+
           <Field label="כותרת">
             <input value={form.title} onChange={(e) => set('title', e.target.value)} />
-          </Field>
-          <Field label="תיאור">
-            <textarea rows={4} value={form.description} onChange={(e) => set('description', e.target.value)} />
           </Field>
           <Field label="חברה">
             <input value={form.company} onChange={(e) => set('company', e.target.value)} />
@@ -139,41 +181,9 @@ export default function ServiceCallDrawer({
               </select>
             </Field>
           </Row>
-          <Field label="סטטוס">
-            <select value={form.status} onChange={(e) => set('status', e.target.value as Status)}>
-              {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-            </select>
-          </Field>
-          <Row>
-            <Field label="לקוח">
-              <input value={form.customer_name} onChange={(e) => set('customer_name', e.target.value)} />
-            </Field>
-            <Field label="אתר">
-              <input value={form.site} onChange={(e) => set('site', e.target.value)} />
-            </Field>
-          </Row>
           <Row>
             <Field label="מספר סניף">
               <input dir="ltr" value={form.branch} onChange={(e) => set('branch', e.target.value)} />
-            </Field>
-            <Field label="מספר מכשיר (סידורי)">
-              <input dir="ltr" value={form.device_sernum} onChange={(e) => set('device_sernum', e.target.value)} />
-            </Field>
-          </Row>
-          {device && (
-            <div style={{
-              padding: '10px 14px', borderRadius: 'var(--radius-sm)',
-              background: 'var(--color-primary-soft)', fontSize: '0.85rem',
-            }}>
-              <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>מכשיר מקושר</div>
-              <div dir="ltr" style={{ fontFamily: 'var(--font-family-en)' }}>{device.sernum} · {device.part_name}</div>
-              {device.part_description && <div style={{ color: 'var(--color-text-light)' }}>{device.part_description}</div>}
-              {device.status && <div style={{ color: 'var(--color-text-light)' }}>סטטוס: {device.status}</div>}
-            </div>
-          )}
-          <Row>
-            <Field label="טלפון">
-              <input dir="ltr" value={form.contact_phone} onChange={(e) => set('contact_phone', e.target.value)} />
             </Field>
             <Field label="הוקצה ל">
               <input value={form.assigned_to} onChange={(e) => set('assigned_to', e.target.value)} />

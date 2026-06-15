@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from ..models import ApiKey, ServiceCall, Source, Status, SyncStatus
+from ..models import ApiKey, Device, ServiceCall, Source, Status, SyncStatus
 from ..models.enums import Category
 from ..schemas.service_call import (
     BotServiceCallIn,
@@ -88,8 +88,27 @@ def ingest_from_bot(db: Session, key: ApiKey, payload: BotServiceCallIn) -> Serv
     return call
 
 
+def _attach_device_description(db: Session, calls: list[ServiceCall]) -> None:
+    """Attach the linked device's description (תאור מתקן) for display.
+
+    Single batched query keyed by serial number — no per-call lookups.
+    """
+    sernums = {c.device_sernum for c in calls if c.device_sernum}
+    descriptions: dict[str, str | None] = {}
+    if sernums:
+        rows = db.execute(
+            select(Device.sernum, Device.part_description).where(Device.sernum.in_(sernums))
+        ).all()
+        descriptions = {sernum: desc for sernum, desc in rows}
+    for c in calls:
+        c.device_part_description = descriptions.get(c.device_sernum) if c.device_sernum else None
+
+
 def get(db: Session, call_id: int) -> ServiceCall | None:
-    return db.get(ServiceCall, call_id)
+    call = db.get(ServiceCall, call_id)
+    if call:
+        _attach_device_description(db, [call])
+    return call
 
 
 def update(db: Session, call: ServiceCall, data: ServiceCallUpdate) -> ServiceCall:
@@ -160,4 +179,5 @@ def list_calls(
             .limit(page_size)
         )
     )
+    _attach_device_description(db, items)
     return items, total
