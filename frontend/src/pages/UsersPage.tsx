@@ -11,11 +11,25 @@ export default function UsersPage() {
   const [form, setForm] = useState<{ email: string; full_name: string; password: string; role: Role }>({
     email: '', full_name: '', password: '', role: 'operator',
   })
+  const [pwEditId, setPwEditId] = useState<number | null>(null)
+  const [pwValue, setPwValue] = useState('')
 
   async function load() {
     setUsers(await api<User[]>('/api/users'))
   }
   useEffect(() => { load() }, [])
+
+  async function changePassword(u: User) {
+    if (pwValue.trim().length < 4) { notify('סיסמה קצרה מדי (לפחות 4 תווים)', 'err'); return }
+    try {
+      await api(`/api/users/${u.id}`, { method: 'PATCH', body: { password: pwValue } })
+      notify(`הסיסמה של ${u.email} עודכנה`)
+      setPwEditId(null)
+      setPwValue('')
+    } catch (err) {
+      notify(err instanceof ApiError ? err.message : 'עדכון הסיסמה נכשל', 'err')
+    }
+  }
 
   async function create() {
     if (!form.email.trim()) { notify('יש להזין אימייל', 'err'); return }
@@ -90,10 +104,33 @@ export default function UsersPage() {
                 </span>
               </td>
               <td>
-                <button className="tact-btn tact-btn-ghost" style={{ padding: '6px 12px' }}
-                  onClick={() => toggleActive(u)}>
-                  {u.is_active ? 'השבת' : 'הפעל'}
-                </button>
+                {pwEditId === u.id ? (
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input
+                      dir="ltr"
+                      type="text"
+                      autoFocus
+                      placeholder="סיסמה חדשה"
+                      value={pwValue}
+                      onChange={(e) => setPwValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') changePassword(u); if (e.key === 'Escape') { setPwEditId(null); setPwValue('') } }}
+                      style={{ font: 'inherit', fontSize: '0.85rem', padding: '6px 10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 150 }}
+                    />
+                    <button className="tact-btn tact-btn-primary" style={{ padding: '6px 12px' }} onClick={() => changePassword(u)}>שמור</button>
+                    <button className="tact-btn tact-btn-ghost" style={{ padding: '6px 10px' }} onClick={() => { setPwEditId(null); setPwValue('') }}>ביטול</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="tact-btn tact-btn-ghost" style={{ padding: '6px 12px' }}
+                      onClick={() => { setPwEditId(u.id); setPwValue('') }}>
+                      שנה סיסמה
+                    </button>
+                    <button className="tact-btn tact-btn-ghost" style={{ padding: '6px 12px' }}
+                      onClick={() => toggleActive(u)}>
+                      {u.is_active ? 'השבת' : 'הפעל'}
+                    </button>
+                  </div>
+                )}
               </td>
             </tr>
           ))}
