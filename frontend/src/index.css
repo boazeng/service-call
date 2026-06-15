@@ -13,8 +13,14 @@
   padding: 28px 24px 64px;
 }
 
+/* Horizontal scroll wrapper — lets wide tables pan sideways on narrow screens. */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
 .tact-table {
   width: 100%;
+  min-width: 1100px;
   border-collapse: separate;
   border-spacing: 0;
   background: var(--color-bg-white);

@@ -120,6 +120,7 @@ export default function ServiceCallsPage() {
         </button>
       </div>
 
+      <div className="table-scroll">
       <table className={`tact-table${expandAll ? ' expanded' : ''}`}>
         <thead>
           <tr>
@@ -221,6 +222,7 @@ export default function ServiceCallsPage() {
           )}
         </tbody>
       </table>
+      </div>
 
       {selected && (
         <ServiceCallDrawer
