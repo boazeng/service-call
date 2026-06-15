@@ -13,9 +13,10 @@ from .seed import seed_users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Dev convenience: create tables + seed on startup. Production uses Alembic.
+    # Ensure tables exist (idempotent) in every environment. Dev also seeds the
+    # demo users; production seeds its admin via `python -m app.bootstrap`.
+    Base.metadata.create_all(bind=engine)
     if settings.is_dev:
-        Base.metadata.create_all(bind=engine)
         db = SessionLocal()
         try:
             seed_users(db)

@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     # MUST be False in any deployed environment.
     enable_dev_login: bool = True
 
+    # Production admin seeded by `python -m app.bootstrap` (set in the server .env).
+    seed_admin_email: str = ""
+    seed_admin_password: str = ""
+
     # ---- Priority ERP integration ----
     # Base URL of the Priority OData/REST API, e.g.
     # https://priority.example.co.il/odata/Priority/tabula.ini/<company>
