@@ -1,0 +1,108 @@
+/* TACT design tokens + recipes first, then Tailwind layers. */
+@import './styles/tokens.css';
+@import './styles/recipes.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App-specific helpers layered on top of the TACT system. */
+.app-main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.tact-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tact-table th {
+  text-align: right;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  background: var(--color-primary-soft);
+  padding: 12px 14px;
+  white-space: nowrap;
+}
+.tact-table td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+.tact-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tact-table tbody tr:hover { background: var(--color-primary-soft); }
+
+/* Calls not yet in Priority (not approved): red emphasis. */
+.tact-table tbody tr.row-local {
+  background: rgba(214, 74, 46, 0.06);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+.tact-table tbody tr.row-local:hover { background: rgba(214, 74, 46, 0.12); }
+.tact-table tbody tr.row-local td:first-child { color: var(--color-accent); font-weight: 700; }
+.local-dot {
+  display: inline-block;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--color-accent);
+  margin-inline-end: 7px;
+  vertical-align: middle;
+}
+
+.tact-field { width: 100%; }
+.tact-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+}
+.tact-field input,
+.tact-field select,
+.tact-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-white);
+}
+.tact-field input:focus,
+.tact-field select:focus,
+.tact-field textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.tact-chip {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Drawer (right-side, RTL) */
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(28, 27, 25, 0.32);
+  z-index: 200; display: flex; justify-content: flex-start;
+}
+.drawer-panel {
+  width: min(540px, 94vw); height: 100%;
+  background: var(--color-bg); box-shadow: var(--shadow-lg);
+  overflow-y: auto; padding: 24px;
+  animation: drawer-in 0.22s ease;
+}
+@keyframes drawer-in { from { transform: translateX(-24px); opacity: 0.4; } to { transform: none; opacity: 1; } }
