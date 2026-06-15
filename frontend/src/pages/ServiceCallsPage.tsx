@@ -28,7 +28,7 @@ export default function ServiceCallsPage() {
   const [showFinal, setShowFinal] = useState(false)
   const [showCancelled, setShowCancelled] = useState(false)
   const [filters, setFilters] = useState({
-    search: '', priority_status: '', source: '', category: '', urgency: '', local_only: '',
+    search: '', priority_status: '', source: '', category: '', urgency: '',
   })
 
   const load = useCallback(async () => {
@@ -41,7 +41,6 @@ export default function ServiceCallsPage() {
         source: filters.source || undefined,
         category: filters.category || undefined,
         urgency: filters.urgency || undefined,
-        local_only: filters.local_only || undefined,
         page_size: 100,
       },
     })
@@ -111,8 +110,6 @@ export default function ServiceCallsPage() {
           options={SOURCES.map((s) => [s, SOURCE_LABELS[s]])} />
         <Select value={filters.urgency} onChange={(v) => set('urgency', v)} placeholder="כל הדחיפויות"
           options={URGENCIES.map((u) => [u, URGENCY_LABELS[u]])} />
-        <Select value={filters.local_only} onChange={(v) => set('local_only', v)} placeholder="מצב Priority"
-          options={[['true', 'מקומיות בלבד'], ['false', 'ב-Priority']]} />
         <button
           className={expandAll ? 'tact-btn tact-btn-primary' : 'tact-btn tact-btn-ghost'}
           style={{ padding: '8px 14px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
