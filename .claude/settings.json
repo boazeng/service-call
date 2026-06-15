@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:\\\\Users\\\\User\\\\Aiprojects\\\\tact-crm-db\" | head -30)",
+      "Read(//c/Users/User/Aiprojects/tact-crm-db/**)"
+    ]
+  }
+}
