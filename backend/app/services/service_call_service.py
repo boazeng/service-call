@@ -207,7 +207,9 @@ def list_calls(
         db.scalars(
             select(ServiceCall)
             .where(*conditions)
-            .order_by(ServiceCall.created_at.desc())
+            # Newest first by the real Priority open date, falling back to the
+            # local import time for calls not yet in Priority.
+            .order_by(func.coalesce(ServiceCall.open_date, ServiceCall.created_at).desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
