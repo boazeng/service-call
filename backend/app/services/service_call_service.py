@@ -129,10 +129,18 @@ def delete(db: Session, call: ServiceCall) -> None:
     db.commit()
 
 
+# Terminal Priority statuses hidden by default (only shown when explicitly enabled).
+PRIORITY_STATUS_FINAL = "סופית"
+PRIORITY_STATUS_CANCELLED = "מבוטלת"
+
+
 def list_calls(
     db: Session,
     *,
     status: str | None = None,
+    priority_status: str | None = None,
+    show_final: bool = False,
+    show_cancelled: bool = False,
     source: str | None = None,
     category: str | None = None,
     urgency: str | None = None,
@@ -142,10 +150,30 @@ def list_calls(
     page: int = 1,
     page_size: int = 50,
 ) -> tuple[list[ServiceCall], int]:
-    """Filtered, paginated list. Returns (items, total)."""
+    """Filtered, paginated list. Returns (items, total).
+
+    Priority status: when `priority_status` is given, filter to exactly it.
+    Otherwise hide the terminal statuses (סופית / מבוטלת) unless show_final /
+    show_cancelled enable them. Local calls (priority_status IS NULL) always show.
+    """
     conditions = []
     if status:
         conditions.append(ServiceCall.status == status)
+    if priority_status:
+        conditions.append(ServiceCall.priority_status == priority_status)
+    else:
+        hidden = []
+        if not show_final:
+            hidden.append(PRIORITY_STATUS_FINAL)
+        if not show_cancelled:
+            hidden.append(PRIORITY_STATUS_CANCELLED)
+        if hidden:
+            conditions.append(
+                or_(
+                    ServiceCall.priority_status.is_(None),
+                    ServiceCall.priority_status.notin_(hidden),
+                )
+            )
     if source:
         conditions.append(ServiceCall.source == source)
     if category:

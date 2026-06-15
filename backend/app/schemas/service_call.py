@@ -76,6 +76,7 @@ class ServiceCallOut(ServiceCallBase):
     downtime_start: str | None = None
     downtime_end: str | None = None
     open_date: str | None = None  # Priority STARTDATE — actual open date/time
+    fault_description: str | None = None  # תאור התקלה — Priority DOCTEXT subform
     # From the linked device (SERNUMBERS) — Priority's call import doesn't carry these.
     device_part_description: str | None = None  # תאור מתקן (Device.part_description)
     device_site_description: str | None = None  # תאור אתר לקוח (Device.site_description)

@@ -11,6 +11,8 @@ deterministic data so the flow runs without a live Priority.
 """
 from __future__ import annotations
 
+import html
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -40,6 +42,22 @@ _DEVICE_ENTITY = "SERNUMBERS"
 
 # Default Priority branch (BRANCHNAME) per call category.
 _CATEGORY_BRANCH = {"maintenance": "026", "energy": "110"}
+
+# Free-text subform on DOCUMENTS_Q that holds the fault description (תאור התקלה).
+_FAULT_SUBFORM = "DOCTEXT_Q_2_SUBFORM"
+
+
+def _html_to_text(raw: str | None) -> str | None:
+    """Priority stores the fault text as HTML — flatten it to readable lines."""
+    if not raw:
+        return None
+    s = re.sub(r"(?is)<style.*?</style>", "", raw)
+    s = re.sub(r"(?i)<\s*br\s*/?>", "\n", s)
+    s = re.sub(r"(?i)</\s*p\s*>", "\n", s)
+    s = re.sub(r"<[^>]+>", "", s)
+    s = html.unescape(s)
+    lines = [ln.strip() for ln in s.splitlines()]
+    return ("\n".join(ln for ln in lines if ln)).strip() or None
 
 
 class PriorityError(RuntimeError):
@@ -118,6 +136,8 @@ def _map_out(call: ServiceCall) -> dict[str, Any]:
 
 def _map_in(record: dict[str, Any]) -> dict[str, Any]:
     """Priority DOCUMENTS_Q record -> normalized dict consumed by sync_service."""
+    sub = record.get(_FAULT_SUBFORM)
+    fault = _html_to_text(sub.get("TEXT")) if isinstance(sub, dict) else None
     return {
         "priority_doc_number": str(record.get("DOCNO") or ""),
         "title": record.get("DETAILS") or record.get("CDES") or str(record.get("DOCNO") or ""),
@@ -130,6 +150,7 @@ def _map_in(record: dict[str, Any]) -> dict[str, Any]:
         "device_sernum": record.get("SERNUM"),
         "contact_phone": record.get("PHONENUM"),
         "open_date": record.get("STARTDATE"),
+        "fault_description": fault,
         "priority_status": record.get("CALLSTATUSCODE"),
         "contract_number": record.get("CONTNUM"),
         "contract_status": record.get("CONTSTATDES"),
@@ -208,7 +229,10 @@ def pull(since: str | None = None) -> list[dict[str, Any]]:
     if since:
         clauses.append(f"STARTDATE ge {since}")
 
-    params: dict = {"$select": _SELECT_FIELDS, "$top": "9999"}
+    # Expand the fault-text subform to read תאור התקלה. NOTE: this Priority
+    # server rejects $select combined with $expand, so we drop $select and
+    # fetch all flat fields (the service-call dataset is small).
+    params: dict = {"$expand": _FAULT_SUBFORM, "$top": "9999"}
     if clauses:
         params["$filter"] = " and ".join(clauses)
     return [_map_in(r) for r in _get_all_pages(_entity_url(), params)]

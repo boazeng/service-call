@@ -104,6 +104,7 @@ def pull_all(db: Session, since: str | None = None) -> SyncLog:
             existing.downtime_start = rec.get("downtime_start") or existing.downtime_start
             existing.downtime_end = rec.get("downtime_end") or existing.downtime_end
             existing.open_date = rec.get("open_date") or existing.open_date
+            existing.fault_description = rec.get("fault_description") or existing.fault_description
             existing.priority_status = rec.get("priority_status")
             existing.status = _map_status(rec.get("priority_status"))
             existing.sync_status = SyncStatus.SYNCED
@@ -134,6 +135,7 @@ def pull_all(db: Session, since: str | None = None) -> SyncLog:
                     downtime_start=rec.get("downtime_start"),
                     downtime_end=rec.get("downtime_end"),
                     open_date=rec.get("open_date"),
+                    fault_description=rec.get("fault_description"),
                     raw_payload=rec,
                     last_synced_at=now,
                 )

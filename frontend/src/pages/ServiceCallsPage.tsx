@@ -2,17 +2,21 @@ import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api, ApiError } from '../lib/api'
 import { useToast } from '../lib/Toast'
 import {
-  CATEGORY_LABELS, SOURCE_LABELS, STATUS_LABELS, SYNC_LABELS, URGENCY_LABELS,
+  CATEGORY_LABELS, SOURCE_LABELS, SYNC_LABELS, URGENCY_LABELS,
   type ServiceCall, type ServiceCallList,
-  type Source, type Status, type Urgency,
+  type Source, type Urgency,
 } from '../lib/types'
 import { StatusChip } from '../components/badges'
 import TactIcon from '../components/TactIcon'
 import ServiceCallDrawer from './ServiceCallDrawer'
 
-const STATUSES: Status[] = ['new', 'in_review', 'ready_to_send', 'sent', 'in_progress', 'closed', 'cancelled']
 const SOURCES: Source[] = ['bot_maintenance', 'bot_energy', 'priority', 'manual']
 const URGENCIES: Urgency[] = ['low', 'medium', 'high', 'urgent']
+// Real Priority statuses to narrow by (terminal סופית/מבוטלת are handled by toggles).
+const PRIORITY_STATUSES = [
+  'מתוכנן', 'לביצוע', 'ממתין', 'בדיקה להסכם', 'להצעת מחיר',
+  'הקפאת תוכנית', 'ת"ע טיפולים', 'לגביה', 'בוצע',
+]
 
 export default function ServiceCallsPage() {
   const { notify } = useToast()
@@ -20,15 +24,20 @@ export default function ServiceCallsPage() {
   const [selected, setSelected] = useState<ServiceCall | null>(null)
   const [pushingId, setPushingId] = useState<number | null>(null)
   const [expandAll, setExpandAll] = useState(false)
+  // Terminal statuses are hidden by default; these toggles bring them back.
+  const [showFinal, setShowFinal] = useState(false)
+  const [showCancelled, setShowCancelled] = useState(false)
   const [filters, setFilters] = useState({
-    search: '', status: '', source: '', category: '', urgency: '', local_only: '',
+    search: '', priority_status: '', source: '', category: '', urgency: '', local_only: '',
   })
 
   const load = useCallback(async () => {
     const res = await api<ServiceCallList>('/api/service-calls', {
       query: {
         search: filters.search || undefined,
-        status: filters.status || undefined,
+        priority_status: filters.priority_status || undefined,
+        show_final: showFinal ? 'true' : undefined,
+        show_cancelled: showCancelled ? 'true' : undefined,
         source: filters.source || undefined,
         category: filters.category || undefined,
         urgency: filters.urgency || undefined,
@@ -37,7 +46,7 @@ export default function ServiceCallsPage() {
       },
     })
     setData(res)
-  }, [filters])
+  }, [filters, showFinal, showCancelled])
 
   useEffect(() => {
     load()
@@ -91,8 +100,13 @@ export default function ServiceCallsPage() {
           value={filters.search}
           onChange={(e) => set('search', e.target.value)}
         />
-        <Select value={filters.status} onChange={(v) => set('status', v)} placeholder="כל הסטטוסים"
-          options={STATUSES.map((s) => [s, STATUS_LABELS[s]])} />
+        <Select value={filters.priority_status} onChange={(v) => set('priority_status', v)} placeholder="כל הסטטוסים"
+          options={PRIORITY_STATUSES.map((s) => [s, s])} />
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>הצג גם:</span>
+          <Toggle on={showFinal} onClick={() => setShowFinal((v) => !v)} label="סופית" />
+          <Toggle on={showCancelled} onClick={() => setShowCancelled((v) => !v)} label="מבוטלת" />
+        </div>
         <Select value={filters.source} onChange={(v) => set('source', v)} placeholder="כל המקורות"
           options={SOURCES.map((s) => [s, SOURCE_LABELS[s]])} />
         <Select value={filters.urgency} onChange={(v) => set('urgency', v)} placeholder="כל הדחיפויות"
@@ -226,6 +240,18 @@ function fmtDate(v: string | null): string {
   if (!v) return '—'
   const [y, m, d] = v.slice(0, 10).split('-')
   return y && m && d ? `${d}/${m}/${y}` : '—'
+}
+
+function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={on ? 'tact-btn tact-btn-primary' : 'tact-btn tact-btn-ghost'}
+      style={{ padding: '6px 12px', fontSize: '0.82rem', border: on ? undefined : '1px solid var(--color-border)' }}
+    >
+      {label}
+    </button>
+  )
 }
 
 function Detail({ label, value, extra }: { label: string; value?: string | null; extra?: string | null }) {

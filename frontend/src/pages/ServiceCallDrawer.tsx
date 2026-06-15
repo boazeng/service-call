@@ -159,6 +159,18 @@ export default function ServiceCallDrawer({
           <Field label="פרטים">
             <textarea rows={4} value={form.description} onChange={(e) => set('description', e.target.value)} />
           </Field>
+          {call.fault_description && (
+            <Field label="תאור התקלה">
+              <div style={{
+                whiteSpace: 'pre-wrap', lineHeight: 1.5, padding: '10px 12px',
+                borderRadius: 'var(--radius-sm)', background: 'var(--color-bg-white)',
+                border: '1px solid var(--color-border)', color: 'var(--color-text)',
+                fontSize: '0.88rem', maxHeight: 220, overflowY: 'auto',
+              }}>
+                {call.fault_description}
+              </div>
+            </Field>
+          )}
           <Row>
             <Field label="טלפון">
               <input dir="ltr" value={form.contact_phone} onChange={(e) => set('contact_phone', e.target.value)} />
