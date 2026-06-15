@@ -69,6 +69,12 @@ class ServiceCallOut(ServiceCallBase):
     status: Status
     sync_status: SyncStatus
     priority_status: str | None
+    branch_description: str | None = None
+    contract_number: str | None = None
+    contract_status: str | None = None
+    paid_until: str | None = None
+    downtime_start: str | None = None
+    downtime_end: str | None = None
     external_id: str | None
     sync_error: str | None
     created_at: datetime

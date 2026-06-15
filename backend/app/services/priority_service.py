@@ -24,8 +24,9 @@ _ISRAEL_TZ = timezone(timedelta(hours=2))
 
 # Priority columns we read on import — keep the $select tight for speed.
 _SELECT_FIELDS = (
-    "DOCNO,CDES,CUSTNAME,BRANCHNAME,SERNUM,PARTNAME,DETAILS,PHONENUM,NAME,"
-    "CALLSTATUSCODE,STARTDATE,ACTIVEFLAG"
+    "DOCNO,CDES,CUSTNAME,BRANCHNAME,BRANCHDES,SERNUM,PARTNAME,DETAILS,PHONENUM,NAME,"
+    "CALLSTATUSCODE,STARTDATE,ACTIVEFLAG,"
+    "CONTNUM,CONTSTATDES,EXPIRYDATE,BREAKSTART,BREAKEND"
 )
 # Columns read from SERNUMBERS when importing devices.
 # (SERNUMBERS has no BRANCHNAME — branch lives only on the service call.)
@@ -120,9 +121,15 @@ def _map_in(record: dict[str, Any]) -> dict[str, Any]:
         "company": record.get("CDES"),
         "customer_name": record.get("NAME") or record.get("CDES"),
         "branch": record.get("BRANCHNAME"),
+        "branch_description": record.get("BRANCHDES"),
         "device_sernum": record.get("SERNUM"),
         "contact_phone": record.get("PHONENUM"),
         "priority_status": record.get("CALLSTATUSCODE"),
+        "contract_number": record.get("CONTNUM"),
+        "contract_status": record.get("CONTSTATDES"),
+        "paid_until": record.get("EXPIRYDATE"),
+        "downtime_start": record.get("BREAKSTART"),
+        "downtime_end": record.get("BREAKEND"),
     }
 
 

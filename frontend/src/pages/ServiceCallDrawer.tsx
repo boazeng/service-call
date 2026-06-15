@@ -179,6 +179,22 @@ export default function ServiceCallDrawer({
               <input value={form.assigned_to} onChange={(e) => set('assigned_to', e.target.value)} />
             </Field>
           </Row>
+
+          {inPriority && (
+            <div style={{
+              padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-bg-white)', border: '1px solid var(--color-border)',
+              display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.85rem',
+            }}>
+              <div style={{ fontWeight: 700, color: 'var(--color-primary)', marginBottom: 2 }}>נתוני Priority</div>
+              <Info label="סטטוס" value={call.priority_status} />
+              <Info label="מספר חוזה" value={call.contract_number} extra={call.contract_status} ltr />
+              <Info label="שולם עד" value={fmtDate(call.paid_until)} ltr />
+              <Info label="תחילת השבתה" value={fmtDateTime(call.downtime_start)} ltr />
+              <Info label="סיום השבתה" value={fmtDateTime(call.downtime_end)} ltr />
+              <Info label="סניף" value={call.branch} extra={call.branch_description} ltr />
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
@@ -202,6 +218,25 @@ export default function ServiceCallDrawer({
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function fmtDate(v: string | null): string {
+  return v ? v.slice(0, 10) : ''
+}
+function fmtDateTime(v: string | null): string {
+  return v ? v.slice(0, 16).replace('T', ' ') : ''
+}
+
+function Info({ label, value, extra, ltr }: { label: string; value?: string | null; extra?: string | null; ltr?: boolean }) {
+  if (!value && !extra) return null
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+      <span style={{ color: 'var(--color-text-light)' }}>{label}</span>
+      <span dir={ltr ? 'ltr' : undefined} style={{ fontWeight: 600, textAlign: 'left' }}>
+        {value || '—'}{extra ? <span dir="rtl" style={{ color: 'var(--color-text-light)', fontWeight: 400 }}> · {extra}</span> : ''}
+      </span>
     </div>
   )
 }

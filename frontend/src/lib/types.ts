@@ -32,11 +32,17 @@ export type ServiceCall = {
   customer_name: string | null
   site: string | null
   branch: string | null
+  branch_description: string | null
   device_sernum: string | null
   contact_phone: string | null
   assigned_to: string | null
   sync_status: SyncStatus
   priority_status: string | null
+  contract_number: string | null
+  contract_status: string | null
+  paid_until: string | null
+  downtime_start: string | null
+  downtime_end: string | null
   external_id: string | null
   sync_error: string | null
   created_at: string

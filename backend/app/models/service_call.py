@@ -47,8 +47,15 @@ class ServiceCall(Base):
     customer_name: Mapped[str | None] = mapped_column(String(255))
     site: Mapped[str | None] = mapped_column(String(255))
     branch: Mapped[str | None] = mapped_column(String(120))           # Priority BRANCHNAME
+    branch_description: Mapped[str | None] = mapped_column(String(255))  # BRANCHDES
     device_sernum: Mapped[str | None] = mapped_column(String(120))    # links to Device.sernum
     contact_phone: Mapped[str | None] = mapped_column(String(40))
+    # Contract + downtime, imported from Priority DOCUMENTS_Q.
+    contract_number: Mapped[str | None] = mapped_column(String(80))    # CONTNUM
+    contract_status: Mapped[str | None] = mapped_column(String(80))    # CONTSTATDES
+    paid_until: Mapped[str | None] = mapped_column(String(40))         # EXPIRYDATE
+    downtime_start: Mapped[str | None] = mapped_column(String(40))     # BREAKSTART
+    downtime_end: Mapped[str | None] = mapped_column(String(40))       # BREAKEND
     assigned_to: Mapped[str | None] = mapped_column(String(160))
 
     # Sync bookkeeping.
