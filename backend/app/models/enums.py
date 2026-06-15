@@ -1,6 +1,14 @@
 """Domain enumerations. Stored as short strings in the DB (not native SQL enums)
 so values stay portable across SQLite/Postgres and easy to map to/from Priority."""
-from enum import StrEnum
+try:
+    from enum import StrEnum  # Python 3.11+
+except ImportError:  # Python 3.10 and earlier
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        """Minimal StrEnum backport: members are real str instances."""
+        def __str__(self) -> str:  # match 3.11 StrEnum behavior
+            return str(self.value)
 
 
 class UserRole(StrEnum):
