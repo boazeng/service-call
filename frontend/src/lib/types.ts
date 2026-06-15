@@ -44,6 +44,7 @@ export type ServiceCall = {
   downtime_start: string | null
   downtime_end: string | null
   device_part_description: string | null
+  device_site_description: string | null
   external_id: string | null
   sync_error: string | null
   created_at: string

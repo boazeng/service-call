@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api, ApiError } from '../lib/api'
 import { useToast } from '../lib/Toast'
 import {
-  SOURCE_LABELS, STATUS_LABELS, URGENCY_LABELS,
+  CATEGORY_LABELS, SOURCE_LABELS, STATUS_LABELS, SYNC_LABELS, URGENCY_LABELS,
   type ServiceCall, type ServiceCallList,
   type Source, type Status, type Urgency,
 } from '../lib/types'
@@ -19,6 +19,7 @@ export default function ServiceCallsPage() {
   const [data, setData] = useState<ServiceCallList | null>(null)
   const [selected, setSelected] = useState<ServiceCall | null>(null)
   const [pushingId, setPushingId] = useState<number | null>(null)
+  const [expandAll, setExpandAll] = useState(false)
   const [filters, setFilters] = useState({
     search: '', status: '', source: '', category: '', urgency: '', local_only: '',
   })
@@ -98,6 +99,14 @@ export default function ServiceCallsPage() {
           options={URGENCIES.map((u) => [u, URGENCY_LABELS[u]])} />
         <Select value={filters.local_only} onChange={(v) => set('local_only', v)} placeholder="מצב Priority"
           options={[['true', 'מקומיות בלבד'], ['false', 'ב-Priority']]} />
+        <button
+          className={expandAll ? 'tact-btn tact-btn-primary' : 'tact-btn tact-btn-ghost'}
+          style={{ padding: '8px 14px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          onClick={() => setExpandAll((v) => !v)}
+        >
+          <TactIcon name={expandAll ? 'chevron-up' : 'chevron-down'} size={14} />
+          {expandAll ? 'כווץ הכל' : 'הרחב הכל'}
+        </button>
       </div>
 
       <table className="tact-table">
@@ -121,8 +130,8 @@ export default function ServiceCallsPage() {
           {data?.items.map((c) => {
             const local = !c.priority_doc_number // not yet approved into Priority
             return (
+            <Fragment key={c.id}>
             <tr
-              key={c.id}
               onClick={() => setSelected(c)}
               className={local ? 'row-local' : undefined}
             >
@@ -142,7 +151,7 @@ export default function ServiceCallsPage() {
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', color: 'var(--color-text-light)' }}>
                 {fmtDate(c.created_at)}
               </td>
-              <td>{c.site || '—'}</td>
+              <td>{c.device_site_description || c.site || '—'}</td>
               <td style={{ fontWeight: 600 }}>{c.customer_name || '—'}</td>
               <td>{c.description || c.title || '—'}</td>
               <td dir="ltr" style={{ whiteSpace: 'nowrap', textAlign: 'right', fontFamily: 'var(--font-family-en)' }}>
@@ -172,6 +181,26 @@ export default function ServiceCallsPage() {
                 )}
               </td>
             </tr>
+            {expandAll && (
+              <tr className={local ? 'row-local' : undefined} onClick={() => setSelected(c)}>
+                <td colSpan={12} style={{ paddingTop: 0, borderTop: 'none' }}>
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: '6px 22px',
+                    padding: '4px 8px 10px', fontSize: '0.82rem', color: 'var(--color-text-light)',
+                  }}>
+                    <Detail label="כותרת" value={c.title} />
+                    <Detail label="חברה" value={c.company} />
+                    <Detail label="קטגוריה" value={CATEGORY_LABELS[c.category]} />
+                    <Detail label="דחיפות" value={URGENCY_LABELS[c.urgency]} />
+                    <Detail label="מקור" value={SOURCE_LABELS[c.source]} />
+                    <Detail label="סנכרון" value={SYNC_LABELS[c.sync_status]} />
+                    <Detail label="סניף" value={c.branch} extra={c.branch_description} />
+                    <Detail label="מסמך Priority" value={c.priority_doc_number} />
+                  </div>
+                </td>
+              </tr>
+            )}
+            </Fragment>
             )
           })}
           {data && data.items.length === 0 && (
@@ -197,6 +226,16 @@ function fmtDate(v: string | null): string {
   if (!v) return '—'
   const [y, m, d] = v.slice(0, 10).split('-')
   return y && m && d ? `${d}/${m}/${y}` : '—'
+}
+
+function Detail({ label, value, extra }: { label: string; value?: string | null; extra?: string | null }) {
+  return (
+    <span style={{ whiteSpace: 'nowrap' }}>
+      <span style={{ color: 'var(--color-text-light)' }}>{label}: </span>
+      <span style={{ color: 'var(--color-text)', fontWeight: 600 }}>{value || '—'}</span>
+      {extra && <span style={{ color: 'var(--color-text-light)' }}> · {extra}</span>}
+    </span>
+  )
 }
 
 function Select({

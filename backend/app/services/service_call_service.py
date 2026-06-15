@@ -88,26 +88,31 @@ def ingest_from_bot(db: Session, key: ApiKey, payload: BotServiceCallIn) -> Serv
     return call
 
 
-def _attach_device_description(db: Session, calls: list[ServiceCall]) -> None:
-    """Attach the linked device's description (תאור מתקן) for display.
+def _attach_device_info(db: Session, calls: list[ServiceCall]) -> None:
+    """Attach the linked device's description (תאור מתקן) and site description
+    (תאור אתר לקוח) for display.
 
-    Single batched query keyed by serial number — no per-call lookups.
+    These live on the device (SERNUMBERS), not on the call — Priority's call
+    import never fills them. Single batched query keyed by serial number.
     """
     sernums = {c.device_sernum for c in calls if c.device_sernum}
-    descriptions: dict[str, str | None] = {}
+    info: dict[str, tuple[str | None, str | None]] = {}
     if sernums:
         rows = db.execute(
-            select(Device.sernum, Device.part_description).where(Device.sernum.in_(sernums))
+            select(Device.sernum, Device.part_description, Device.site_description)
+            .where(Device.sernum.in_(sernums))
         ).all()
-        descriptions = {sernum: desc for sernum, desc in rows}
+        info = {sernum: (part, site) for sernum, part, site in rows}
     for c in calls:
-        c.device_part_description = descriptions.get(c.device_sernum) if c.device_sernum else None
+        part, site = info.get(c.device_sernum, (None, None)) if c.device_sernum else (None, None)
+        c.device_part_description = part
+        c.device_site_description = site
 
 
 def get(db: Session, call_id: int) -> ServiceCall | None:
     call = db.get(ServiceCall, call_id)
     if call:
-        _attach_device_description(db, [call])
+        _attach_device_info(db, [call])
     return call
 
 
@@ -179,5 +184,5 @@ def list_calls(
             .limit(page_size)
         )
     )
-    _attach_device_description(db, items)
+    _attach_device_info(db, items)
     return items, total

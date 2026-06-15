@@ -127,9 +127,14 @@ export default function ServiceCallDrawer({
             <input dir="ltr" readOnly value={fmtDate(call.created_at)}
               style={{ textAlign: 'right', color: 'var(--color-text-light)' }} />
           </Field>
+          <Field label="שעת פתיחה">
+            <input dir="ltr" readOnly value={fmtTime(call.created_at)}
+              style={{ textAlign: 'right', color: 'var(--color-text-light)' }} />
+          </Field>
           <Row>
             <Field label="תאור אתר לקוח">
-              <input value={form.site} onChange={(e) => set('site', e.target.value)} />
+              <input readOnly value={device?.site_description || form.site || ''}
+                style={{ color: 'var(--color-text-light)' }} />
             </Field>
             <Field label="שם לקוח">
               <input value={form.customer_name} onChange={(e) => set('customer_name', e.target.value)} />
@@ -234,6 +239,9 @@ export default function ServiceCallDrawer({
 
 function fmtDate(v: string | null): string {
   return v ? v.slice(0, 10) : ''
+}
+function fmtTime(v: string | null): string {
+  return v ? v.slice(11, 16) : ''
 }
 function fmtDateTime(v: string | null): string {
   return v ? v.slice(0, 16).replace('T', ' ') : ''

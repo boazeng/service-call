@@ -157,6 +157,8 @@ const GLYPHS: Record<string, ReactNode> = {
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </>
   ),
+  'chevron-down': <polyline points="6 9 12 15 18 9" />,
+  'chevron-up': <polyline points="18 15 12 9 6 15" />,
 }
 
 type Props = { name: string; size?: number; stroke?: number; className?: string }

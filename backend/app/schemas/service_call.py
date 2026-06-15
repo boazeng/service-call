@@ -75,8 +75,9 @@ class ServiceCallOut(ServiceCallBase):
     paid_until: str | None = None
     downtime_start: str | None = None
     downtime_end: str | None = None
-    # תאור מתקן — description of the linked device (Device.part_description).
-    device_part_description: str | None = None
+    # From the linked device (SERNUMBERS) — Priority's call import doesn't carry these.
+    device_part_description: str | None = None  # תאור מתקן (Device.part_description)
+    device_site_description: str | None = None  # תאור אתר לקוח (Device.site_description)
     external_id: str | None
     sync_error: str | None
     created_at: datetime
