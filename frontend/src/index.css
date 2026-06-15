@@ -47,9 +47,9 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-/* Expanded mode: group each call's two rows; one horizontal separator per call. */
+/* Expanded mode: group each call's two rows; one clear horizontal separator per call. */
 .tact-table.expanded td { border-top: none; }
-.tact-table.expanded tr.call-detail > td { border-bottom: 1.5px solid var(--color-border); }
+.tact-table.expanded tr.call-detail > td { border-bottom: 2px solid rgba(31, 58, 95, 0.35); }
 .tact-table tbody tr:hover { background: var(--color-primary-soft); }
 
 /* Calls not yet in Priority (not approved): red emphasis. */
